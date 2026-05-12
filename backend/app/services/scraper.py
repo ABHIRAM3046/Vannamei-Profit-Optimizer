@@ -68,14 +68,13 @@ async def scrape_abgains_prices() -> dict[int, float]:
 def _get_simulated_prices() -> dict[int, float]:
     """Returns simulated price data if the scraper gets blocked by firewalls."""
     return {
-        20: 530.0,
-        25: 490.0,
-        30: 460.0,
-        40: 390.0,
-        50: 340.0,
-        60: 300.0,
-        70: 270.0,
-        80: 250.0,
-        90: 230.0,
-        100: 210.0
+        25: 530.0,
+        30: 470.0,
+        40: 360.0,
+        50: 330.0,
+        60: 310.0,
+        70: 300.0,
+        80: 290.0,
+        90: 270.0,
+        100: 260.0
     }

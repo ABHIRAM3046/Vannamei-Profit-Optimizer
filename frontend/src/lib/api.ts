@@ -154,6 +154,22 @@ export const harvestAPI = {
     request<HarvestPlan>(`/api/ponds/${pondId}/harvest-plan`),
 };
 
+// ─── IoT Telemetry ───────────────────────────────────
+
+export const iotAPI = {
+  registerDevice: (data: DeviceCreateData) =>
+    request<Device>("/api/iot/devices", {
+      method: "POST",
+      body: data,
+    }),
+
+  listDevices: () =>
+    request<Device[]>("/api/iot/devices"),
+
+  latestTelemetry: (pondId: string) =>
+    request<SensorReading>(`/api/iot/ponds/${pondId}/latest-telemetry`),
+};
+
 // ─── Types ───────────────────────────────────────────
 
 export interface MarketPrice {
@@ -315,4 +331,31 @@ export interface HarvestPlan {
   optimal_profit: number;
   harvest_now_profit: number;
   recommendation: string;
+}
+
+export interface Device {
+  id: string;
+  device_id: string;
+  pond_id: string | null;
+  name: string | null;
+  is_active: boolean;
+  last_seen: string | null;
+  created_at: string;
+}
+
+export interface DeviceCreateData {
+  device_id: string;
+  pond_id?: string;
+  name?: string;
+}
+
+export interface SensorReading {
+  id: string;
+  device_id: string;
+  pond_id: string | null;
+  timestamp: string;
+  temperature_c: number | null;
+  ph: number | null;
+  dissolved_oxygen: number | null;
+  ammonia: number | null;
 }

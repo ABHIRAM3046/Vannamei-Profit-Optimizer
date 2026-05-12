@@ -60,7 +60,7 @@ export default function MarketPricesView() {
 
   if (loading) return <div style={{ padding: "2rem", textAlign: "center" }}>Loading...</div>;
 
-  const standardCounts = [20, 25, 30, 40, 50, 60, 70, 80, 90, 100];
+  const standardCounts = [25, 30, 40, 50, 60, 70, 80, 90, 100];
   const fullPrices = standardCounts.map(count => {
     const existing = prices.find(p => p.count_per_kg === count);
     return {

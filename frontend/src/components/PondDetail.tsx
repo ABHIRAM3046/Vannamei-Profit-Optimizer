@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useState } from "react";
-import { analyticsAPI, type Analytics, type FeedRecommendation } from "@/lib/api";
+import { analyticsAPI, iotAPI, type Analytics, type FeedRecommendation, type SensorReading } from "@/lib/api";
 import { useTranslation } from "@/lib/i18n/context";
 import TrendCharts from "./TrendCharts";
+import IoTSetupCard from "./IoTSetupCard";
 
 interface Props { pondId: string; onAddLog: () => void; onViewHarvest: () => void; onTransfer: () => void; onBack: () => void; }
 
@@ -17,6 +18,7 @@ function fcrColor(fcr: number | null | undefined): string {
 export default function PondDetail({ pondId, onAddLog, onViewHarvest, onTransfer, onBack }: Props) {
   const { t } = useTranslation();
   const [data, setData] = useState<Analytics | null>(null);
+  const [telemetry, setTelemetry] = useState<SensorReading | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -26,6 +28,11 @@ export default function PondDetail({ pondId, onAddLog, onViewHarvest, onTransfer
       .then(setData)
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
+
+    // Try to get latest telemetry
+    iotAPI.latestTelemetry(pondId)
+      .then(setTelemetry)
+      .catch(() => { /* ignore 404 if no device */ });
   }, [pondId]);
 
   if (loading) return <div style={{ display: "flex", justifyContent: "center", paddingTop: "4rem" }}><div className="spinner" /></div>;
@@ -52,6 +59,43 @@ export default function PondDetail({ pondId, onAddLog, onViewHarvest, onTransfer
           <button className="btn-primary" onClick={onAddLog}>{t("detail.addLog")}</button>
         </div>
       </div>
+
+      <IoTSetupCard pondId={pondId} />
+
+      {telemetry && (
+        <div className="glass-card" style={{ padding: "1.5rem", marginBottom: "1.5rem", borderLeft: "4px solid var(--cyan)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1rem" }}>
+            <h3 style={{ fontSize: "1.1rem", fontWeight: 600 }}>🌊 Live Water Quality</h3>
+            <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
+              Updated {new Date(telemetry.timestamp).toLocaleTimeString()}
+            </span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(140px, 1fr))", gap: "1rem" }}>
+            <div>
+              <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase" }}>DO (mg/L)</div>
+              <div style={{ fontSize: "1.25rem", fontWeight: 700, color: (telemetry.dissolved_oxygen || 0) < 4 ? "var(--red)" : "var(--cyan)" }}>
+                {telemetry.dissolved_oxygen?.toFixed(2) || "—"}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase" }}>pH</div>
+              <div style={{ fontSize: "1.25rem", fontWeight: 700, color: ((telemetry.ph || 7) < 7 || (telemetry.ph || 7) > 8.5) ? "var(--orange)" : "var(--teal)" }}>
+                {telemetry.ph?.toFixed(2) || "—"}
+              </div>
+            </div>
+            <div>
+              <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Temp (°C)</div>
+              <div style={{ fontSize: "1.25rem", fontWeight: 700 }}>{telemetry.temperature_c?.toFixed(1) || "—"}</div>
+            </div>
+            <div>
+              <div style={{ fontSize: "0.7rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Ammonia (mg/L)</div>
+              <div style={{ fontSize: "1.25rem", fontWeight: 700, color: (telemetry.ammonia || 0) > 0.1 ? "var(--red)" : "var(--green)" }}>
+                {telemetry.ammonia?.toFixed(3) || "—"}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Metric Cards */}
       <div className="stagger-children" style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>

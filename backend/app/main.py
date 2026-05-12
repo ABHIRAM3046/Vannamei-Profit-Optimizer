@@ -18,7 +18,7 @@ from app.routers.analytics import (
     harvest_router,
 )
 from app.routers.prices import router as prices_router
-
+from app.routers.iot import router as iot_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -52,6 +52,7 @@ app.include_router(feed_router)
 app.include_router(alerts_router)
 app.include_router(harvest_router)
 app.include_router(prices_router)
+app.include_router(iot_router)
 
 
 @app.get("/api/health", tags=["health"])

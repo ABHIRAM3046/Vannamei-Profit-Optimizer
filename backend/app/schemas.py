@@ -235,6 +235,46 @@ class HarvestPlanResponse(BaseModel):
     recommendation: str
 
 
+# ─── IoT Telemetry ────────────────────────────────────────
+
+class DeviceCreate(BaseModel):
+    device_id: str
+    pond_id: Optional[str] = None
+    name: Optional[str] = None
+
+class DeviceResponse(BaseModel):
+    id: str
+    device_id: str
+    pond_id: Optional[str]
+    name: Optional[str]
+    is_active: bool
+    last_seen: Optional[datetime]
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+class SensorReadingCreate(BaseModel):
+    device_id: str
+    temperature_c: Optional[float] = None
+    ph: Optional[float] = None
+    dissolved_oxygen: Optional[float] = None
+    ammonia: Optional[float] = None
+
+class SensorReadingResponse(BaseModel):
+    id: str
+    device_id: str
+    pond_id: Optional[str]
+    timestamp: datetime
+    temperature_c: Optional[float]
+    ph: Optional[float]
+    dissolved_oxygen: Optional[float]
+    ammonia: Optional[float]
+
+    class Config:
+        from_attributes = True
+
+
 # Forward references
 TokenResponse.model_rebuild()
 PondResponse.model_rebuild()

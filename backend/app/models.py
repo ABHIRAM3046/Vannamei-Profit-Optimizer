@@ -124,3 +124,36 @@ class MarketPrice(Base):
     count_per_kg = Column(Integer, nullable=False) # 10, 20, 30... 100
     price_per_kg = Column(Float, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
+
+class Device(Base):
+    __tablename__ = "devices"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    device_id = Column(String(50), unique=True, nullable=False, index=True) # MAC address or ESP ID
+    pond_id = Column(String, ForeignKey("ponds.id"), nullable=True) # Can be unassigned initially
+    name = Column(String(100), nullable=True)
+    is_active = Column(Boolean, default=True)
+    last_seen = Column(DateTime, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
+    # Relationships
+    pond = relationship("Pond")
+
+
+class SensorReading(Base):
+    __tablename__ = "sensor_readings"
+
+    id = Column(String, primary_key=True, default=generate_uuid)
+    device_id = Column(String, ForeignKey("devices.id"), nullable=False, index=True)
+    pond_id = Column(String, ForeignKey("ponds.id"), nullable=True, index=True)
+    timestamp = Column(DateTime, default=datetime.utcnow, index=True)
+    
+    # Readings
+    temperature_c = Column(Float, nullable=True)
+    ph = Column(Float, nullable=True)
+    dissolved_oxygen = Column(Float, nullable=True)
+    ammonia = Column(Float, nullable=True)
+
+    # Relationships
+    device = relationship("Device")
+    pond = relationship("Pond")
